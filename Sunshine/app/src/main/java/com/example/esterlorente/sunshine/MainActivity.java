@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.esterlorente.sunshine.data.WeatherContract;
+import com.example.esterlorente.sunshine.sync.SunshineSyncAdapter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -66,6 +67,8 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         ForecastFragment forecastFragment =  ((ForecastFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_forecast));
         forecastFragment.setUseTodayLayout(!mTwoPane);
+
+        SunshineSyncAdapter.initializeSyncAdapter(this);
     }
 
 
@@ -88,46 +91,16 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
-        if (id == R.id.action_map) {
-            openPreferredLocationMap();
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void openPreferredLocationMap() {
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String location = sharedPrefs.getString(
-                getString(R.string.pref_location_key),
-                getString(R.string.pref_location_default));
 
-        Uri geoLocation = Uri.parse("geo:0,0?").buildUpon()
-                .appendQueryParameter("q", location)
-                .build();
-
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(geoLocation);
-
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Log.d(TAG, "Couldn't call " + location);
-        }
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
         String location = Utility.getPreferredLocation(this);
-
-        /*
-        if (!mLocation.equals(location)) {
-            ForecastFragment ff = (ForecastFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
-            ff.onLocationChanged();
-            mLocation = location;
-        }
-        */
 
         // update the location in our second pane using the fragment manager
         if (location != null && !location.equals(mLocation)) {
